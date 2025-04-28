@@ -34,31 +34,35 @@ if mode == "Tìm kiếm từ khóa tự chọn":
         if not keywords:
             st.warning("Vui lòng nhập ít nhất 1 từ khóa.")
         else:
-            pytrends.build_payload(kw_list=keywords, timeframe='today 1-m', geo=geo)
-            df_interest = pytrends.interest_over_time()
+            try:
+                pytrends.build_payload(kw_list=keywords, timeframe='today 1-m', geo=geo)
+                df_interest = pytrends.interest_over_time()
 
-            if df_interest.empty:
-                st.warning("Không có dữ liệu phù hợp cho các từ khóa.")
-            else:
-                df_interest = df_interest.drop(columns=['isPartial'])
-                st.success("📊 Dữ liệu so sánh chi tiết theo thời gian:")
-                st.dataframe(df_interest)
+                if df_interest.empty:
+                    st.warning("Không có dữ liệu phù hợp cho các từ khóa.")
+                else:
+                    df_interest = df_interest.drop(columns=['isPartial'])
+                    st.success("📊 Dữ liệu so sánh chi tiết theo thời gian:")
+                    st.dataframe(df_interest)
 
-                fig = px.line(df_interest, x=df_interest.index, y=df_interest.columns,
-                              title=f"Biểu đồ xu hướng tìm kiếm (1 tháng) tại {country}")
-                st.plotly_chart(fig)
+                    fig = px.line(df_interest, x=df_interest.index, y=df_interest.columns,
+                                  title=f"Biểu đồ xu hướng tìm kiếm (1 tháng) tại {country}")
+                    st.plotly_chart(fig)
 
-                avg_searches = df_interest.mean().sort_values(ascending=False).reset_index()
-                avg_searches.columns = ['Từ khóa', 'Mức độ tìm kiếm trung bình']
+                    avg_searches = df_interest.mean().sort_values(ascending=False).reset_index()
+                    avg_searches.columns = ['Từ khóa', 'Mức độ tìm kiếm trung bình']
 
-                st.subheader("📈 So sánh tổng thể trung bình các từ khóa")
-                st.dataframe(avg_searches)
+                    st.subheader("📈 So sánh tổng thể trung bình các từ khóa")
+                    st.dataframe(avg_searches)
 
-                fig2 = px.bar(avg_searches,
-                              x='Từ khóa',
-                              y='Mức độ tìm kiếm trung bình',
-                              title="So sánh mức độ tìm kiếm trung bình")
-                st.plotly_chart(fig2)
+                    fig2 = px.bar(avg_searches,
+                                  x='Từ khóa',
+                                  y='Mức độ tìm kiếm trung bình',
+                                  title="So sánh mức độ tìm kiếm trung bình")
+                    st.plotly_chart(fig2)
+
+            except Exception as e:
+                st.error("⚠️ Gặp lỗi khi truy cập Google Trends. Có thể do giới hạn số lần yêu cầu. Vui lòng thử lại sau vài phút.")
 
 elif mode == "Xem từ khóa hot hôm nay theo quốc gia":
     st.subheader("🔥 Từ khóa hot trong ngày")
